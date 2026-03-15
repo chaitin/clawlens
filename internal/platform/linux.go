@@ -33,11 +33,7 @@ func (p *linuxPlatform) OpenClawHome() string {
 }
 
 func (p *linuxPlatform) FindProcesses() ([]ProcessInfo, error) {
-	out, err := exec.Command("ps", "aux").Output()
-	if err != nil {
-		return nil, err
-	}
-	return parseUnixPSOutput(out), nil
+	return FindProcesses()
 }
 
 func (p *linuxPlatform) FindServices() ([]ServiceInfo, error) {

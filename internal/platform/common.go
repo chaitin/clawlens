@@ -1,36 +1,47 @@
 package platform
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
+
+	"github.com/shirou/gopsutil/v4/process"
 )
 
-func parseUnixPSOutput(output []byte) []ProcessInfo {
-	var processes []ProcessInfo
+// FindProcesses returns all OpenClaw-related processes using gopsutil.
+func FindProcesses() ([]ProcessInfo, error) {
+	procs, err := process.Processes()
+	if err != nil {
+		return nil, fmt.Errorf("listing processes: %w", err)
+	}
 
-	for _, line := range strings.Split(string(output), "\n") {
-		fields := strings.Fields(line)
-		if len(fields) < 11 {
+	var result []ProcessInfo
+	for _, proc := range procs {
+		name, err := proc.Name()
+		if err != nil {
 			continue
 		}
-		command := fields[10]
-		if !isOpenClawCommand(command) {
+
+		if !isOpenClawCommand(name) {
 			continue
 		}
 
-		processes = append(processes, ProcessInfo{
-			PID:  fields[1],
-			Name: filepath.Base(command),
-			Cmd:  strings.Join(fields[10:], " "),
+		cmd, _ := proc.Cmdline()
+		result = append(result, ProcessInfo{
+			PID:  fmt.Sprintf("%d", proc.Pid),
+			Name: name,
+			Cmd:  cmd,
 		})
 	}
 
-	return processes
+	return result, nil
 }
 
 func isOpenClawCommand(command string) bool {
 	command = strings.ToLower(filepath.Base(command))
 	return command == "openclaw" ||
 		command == "openclaw-gateway" ||
+		command == "openclaw.exe" ||
+		command == "openclaw-gateway.exe" ||
 		strings.HasPrefix(command, "openclaw-")
 }

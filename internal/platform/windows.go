@@ -3,8 +3,6 @@
 package platform
 
 import (
-	"encoding/csv"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -70,39 +68,7 @@ func findAllUserHomeDirs() []string {
 }
 
 func (p *windowsPlatform) FindProcesses() ([]ProcessInfo, error) {
-	out, err := exec.Command("tasklist", "/FO", "CSV", "/NH").Output()
-	if err != nil {
-		return nil, err
-	}
-
-	var procs []ProcessInfo
-	reader := csv.NewReader(strings.NewReader(string(out)))
-	reader.FieldsPerRecord = -1
-
-	for {
-		record, err := reader.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-		if len(record) < 2 {
-			continue
-		}
-
-		name := record[0]
-		if !isOpenClawCommand(name) {
-			continue
-		}
-
-		procs = append(procs, ProcessInfo{
-			PID:  record[1],
-			Name: name,
-			Cmd:  name,
-		})
-	}
-	return procs, nil
+	return FindProcesses()
 }
 
 func (p *windowsPlatform) FindServices() ([]ServiceInfo, error) {

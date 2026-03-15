@@ -32,11 +32,7 @@ func (p *darwinPlatform) OpenClawHome() string {
 }
 
 func (p *darwinPlatform) FindProcesses() ([]ProcessInfo, error) {
-	out, err := exec.Command("ps", "aux").Output()
-	if err != nil {
-		return nil, err
-	}
-	return parseUnixPSOutput(out), nil
+	return FindProcesses()
 }
 
 func (p *darwinPlatform) FindServices() ([]ServiceInfo, error) {
