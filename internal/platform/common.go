@@ -2,7 +2,6 @@ package platform
 
 import (
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	"github.com/shirou/gopsutil/v4/process"
@@ -21,12 +20,13 @@ func FindProcesses() ([]ProcessInfo, error) {
 		if err != nil {
 			continue
 		}
-
-		if !isOpenClawCommand(name) {
+		cmd, err := proc.Cmdline()
+		if err != nil {
 			continue
 		}
-
-		cmd, _ := proc.Cmdline()
+		if !isOpenClawCmdline(cmd) {
+			continue
+		}
 		result = append(result, ProcessInfo{
 			PID:  fmt.Sprintf("%d", proc.Pid),
 			Name: name,
@@ -37,11 +37,10 @@ func FindProcesses() ([]ProcessInfo, error) {
 	return result, nil
 }
 
-func isOpenClawCommand(command string) bool {
-	command = strings.ToLower(filepath.Base(command))
-	return command == "openclaw" ||
-		command == "openclaw-gateway" ||
-		command == "openclaw.exe" ||
-		command == "openclaw-gateway.exe" ||
-		strings.HasPrefix(command, "openclaw-")
+func isOpenClawCmdline(cmd string) bool {
+	cmd = strings.ToLower(cmd)
+	if strings.Contains(cmd, "openclaw") && strings.Contains(cmd, "gateway") {
+		return true
+	}
+	return false
 }
