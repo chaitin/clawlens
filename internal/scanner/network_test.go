@@ -40,10 +40,10 @@ func TestScanNetworkPortOpenLocalhost(t *testing.T) {
 	if len(findings) != 1 {
 		t.Fatalf("expected 1 finding, got %d", len(findings))
 	}
-	if findings[0].Severity != Warning {
-		t.Fatalf("expected Warning severity, got %v", findings[0].Severity)
+	if findings[0].Severity != Info {
+		t.Fatalf("expected Info severity, got %v", findings[0].Severity)
 	}
-	if findings[0].Title != "网关端口已开放" {
+	if findings[0].Title != "网关端口仅在本地开放" {
 		t.Fatalf("unexpected title: %q", findings[0].Title)
 	}
 }
@@ -57,16 +57,13 @@ func TestScanNetworkPortOpenAllInterfaces(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ScanNetwork returned error: %v", err)
 	}
-	if len(findings) != 2 {
-		t.Fatalf("expected 2 findings, got %d", len(findings))
+	if len(findings) != 1 {
+		t.Fatalf("expected 1 findings, got %d", len(findings))
 	}
-	if findings[0].Severity != Warning {
-		t.Fatalf("findings[0]: expected Warning, got %v", findings[0].Severity)
-	}
-	if findings[1].Severity != Critical {
+	if findings[0].Severity != Critical {
 		t.Fatalf("findings[1]: expected Critical, got %v", findings[1].Severity)
 	}
-	if findings[1].Title != "网关暴露到外部网络" {
+	if findings[0].Title != "网关暴露到外部网络" {
 		t.Fatalf("unexpected title: %q", findings[1].Title)
 	}
 }
